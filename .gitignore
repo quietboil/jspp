@@ -1,0 +1,9 @@
+*
+!/**/
+!*.*
+!Makefile
+!LICENSE
+.*
+!.gitignore
+*.[o a exe]
+config.mk
