@@ -13,7 +13,7 @@ I tried to find the existing library that would do the job. I had only 3 criteri
 - It should not, if possible, allocate memory. At least not lot and, if it does, I'd like to have some control over the allocation.
 - It should allow me to parse JSON fragments as they arrive and do not expect to have the entire JSON in memory before parsing it.
 
-The last requirement probably was the most important (my memory anxiousness again :smiley:) as some services I considered during the design phase returned very large resposnes. Why anyone would need an antology in the web service response is still beyond me. Alas at least one service I wanted to use has it.
+The last requirement probably was the most important (my memory anxiousness again :smiley:) as some services I considered during the design phase returned very large responses. Why anyone would need an antology in the web service response is still beyond me. Alas at least one service I wanted to use has it.
 
 While I found quite a few libraries that parse JSON, some better than others in my opinion, I could not find one that would work for me. I'm sure it's out there, but after some time I just gave up and this JSON parser was born. Yep, yet another one :smiley:
 
@@ -128,7 +128,7 @@ void process_example_response(const uint8_t * http_data, uin16_t data_size)
         return;
     }
 
-    text = jspp_token_text(&parser, &length);
+    text = jspp_text(&parser, &length);
     if (strncmp("target", text, text_length) != 0) {
         // Cannot recognize the returned object
         return;
@@ -141,19 +141,19 @@ void process_example_response(const uint8_t * http_data, uin16_t data_size)
 
     uint8_t target = NOBODY; // be lenient and use default if the target us unknown
 
-    text = jspp_token_text(&parser, &length)
+    text = jspp_text(&parser, &length)
     if (strncmp("World", text, text_length) == 0) {
         target = WORLD;
     }
   
     if (JSON_MEMBER_NAME != jspp_next(&parser)) return;  // JSON structure issues
-    text = jspp_token_text(&parser, &length);
+    text = jspp_text(&parser, &length);
     if (strncmp("action", text, text_length) != 0) return;  // Not what we expected
     if (JSON_STRING != jspp_next(&parser)) return;       // Unexpected data format
 
     uint8_t action = DO_NOTHING;
 
-    text = jspp_token_text(&parser, &length)
+    text = jspp_text(&parser, &length)
     if (strncmp("Hello", text, text_length) == 0) {
         target = SAY_HELLO;
     }
