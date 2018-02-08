@@ -6,9 +6,10 @@
 // Note that some of these are just tags that are defined to make code
 // more readable.
 enum _states {
-    __SCANNER_STATES = 0x20,
 
-    NULL_N,
+    // __SCANNER_STATES
+
+    NULL_N = 229,
     NULL_U,
     NULL_L,
     TRUE_T,
@@ -22,22 +23,23 @@ enum _states {
     STRING_BEGIN,
     STRING_CHARS,
     STRING_ESC,
-    __STRING_END,
+    // __STRING_END
 
     NUMBER_BEGIN,
     INT_DIGITS,
     DEC_DIGITS,
     EXP,
     EXP_DIGITS,
-    __NUMBER_END,
+    // __NUMBER_END
 
-    __PARSER_STATES = 0x40,
+    // __PARSER_STATES
 
     EXPECTING_ARRAY_TAIL,
     EXPECTING_OBJECT_TAIL,
     EXPECTING_OBJECT_MEMBER_NAME_VALUE_SEPARATOR,
 
-    __REDUCING_PARSER_STATES = 0x50,
+    // __REDUCING_PARSER_STATES
+
     // The states below will make the parser "reduce" the stack and
     // return a token. Unlike the states above that only "shift" (do
     // not mistake this for a LALR shift) the parser into a new state.
@@ -50,6 +52,14 @@ enum _states {
     EXPECTING_OBJECT_MEMBER_VALUE
 };
 
+enum _state_markers {
+    __SCANNER_STATES = NULL_N,
+    __PARSER_STATES = EXPECTING_ARRAY_TAIL,
+    __REDUCING_PARSER_STATES = EXPECTING_JSON,
+    __STRING_END = STRING_ESC,
+    __NUMBER_END = EXP_DIGITS
+};
+
 /**
  * \brief "Looks up" the next automaton state.
  *
@@ -60,7 +70,7 @@ enum _states {
  */
 static uint8_t next_scan_state(uint8_t state, uint8_t lookahead)
 {
-    if (state > __PARSER_STATES) {
+    if (state >= __PARSER_STATES) {
         switch (lookahead) {
             case '\t':
             case '\n':
@@ -349,7 +359,7 @@ uint8_t jspp_next(jspp_t * parser)
             if (++parser->level == JSON_MAX_STACK) {
                 return JSON_TOO_DEEP;
             }
-        } else if (state > __REDUCING_PARSER_STATES) {
+        } else if (state >= __REDUCING_PARSER_STATES) {
             set_state(parser, state);
         }
     } while (!is_final(state) && ++txt < end);
@@ -379,13 +389,13 @@ uint8_t jspp_next(jspp_t * parser)
     set_state(parser, state);
     set_token_end(parser, state, end);
 
-    if (STRING_BEGIN <= state && state < __STRING_END) {
+    if (STRING_BEGIN <= state && state <= __STRING_END) {
         uint8_t prev_level_state = parser->stack[parser->level - 1];
         if (is_string_a_member_name(prev_level_state)) {
             return JSON_MEMBER_NAME_PART;
         }
         return JSON_STRING_PART;
-    } else if (NUMBER_BEGIN <= state && state < __NUMBER_END) {
+    } else if (NUMBER_BEGIN <= state && state <= __NUMBER_END) {
         return JSON_NUMBER_PART;
     } else {
         return JSON_CONTINUE;
