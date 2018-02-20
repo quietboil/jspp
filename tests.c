@@ -463,6 +463,40 @@ static int skip_elements()
     return 0;
 }
 
+// test token ID re-ordering regression fix
+static int skip_split_values()
+{
+    jspp_t parser;
+    const char * text;
+    uint16_t length;
+
+    const char json11[] = "[ 659, 72";
+    const char json12[] = "7, 929]";
+
+    check(JSON_ARRAY_BEGIN == jspp_start(&parser, json11, sizeof(json11) - 1));
+    check(JSON_INTEGER == jspp_next(&parser));
+    check_text("659");
+    check(JSON_CONTINUE == jspp_skip_next(&parser));
+    check(JSON_INTEGER == jspp_continue(&parser, json12, sizeof(json12) - 1));
+    check_text("929");
+    check(JSON_ARRAY_END == jspp_next(&parser));
+    check(JSON_END == jspp_next(&parser));
+
+    const char json21[] = "[ \"abc\", \"de";
+    const char json22[] = "f\", \"klm\"]";
+
+    check(JSON_ARRAY_BEGIN == jspp_start(&parser, json21, sizeof(json21) - 1));
+    check(JSON_STRING == jspp_next(&parser));
+    check_text("abc");
+    check(JSON_CONTINUE == jspp_skip_next(&parser));
+    check(JSON_STRING == jspp_continue(&parser, json22, sizeof(json22) - 1));
+    check_text("klm");
+    check(JSON_ARRAY_END == jspp_next(&parser));
+    check(JSON_END == jspp_next(&parser));
+
+    return 0;
+}
+
 int main()
 {
     test(parse_simple_json, "Parse a one element JSON");
@@ -476,6 +510,7 @@ int main()
     test(parse_object, "Parse JSON objects");
     test(parse_split_object, "Parse object split between transmission fragments");
     test(skip_elements, "Skip JSON elements");
+    test(skip_split_values, "Skip split numbers and strings");
     printf("DONE: %d/%d\n", num_tests_passed, num_tests_passed + num_tests_failed);
     return num_tests_failed > 0;
 }

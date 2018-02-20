@@ -422,7 +422,7 @@ uint8_t jspp_skip_next(jspp_t * parser)
         parser->skip_token = 0;
         return token;
     }
-    if (token <= JSON_MEMBER_NAME_PART) {
+    if (token <= JSON_STRING_PART) {
         parser->skip_level = parser->level;
         parser->skip_token = JSON_CONTINUE;
         return JSON_CONTINUE;
