@@ -12,12 +12,12 @@ enum _json_tokens {
     JSON_CONTINUE,          ///< The current text fragment ended before the entire JSON was parsed.
                             ///< Next text fragment is needed to continue.
 
+    JSON_MEMBER_NAME_PART,  ///< The (first) part of the object member name split at the fragment boundary
     JSON_NUMBER_PART,       ///< Partially recognized number. Returned when a number crosses the text fragment boundaries
                             ///< Specific type (integer, decimal, floating point) will be returned when number is completly
                             ///< recognized. Caller is expected to save this partial result and then combine it with the
                             ///< rest of the number from the next text fragment.
     JSON_STRING_PART,       ///< String that spans multiple (at least 2) text fragments
-    JSON_MEMBER_NAME_PART,
 
     JSON_NULL,
     JSON_TRUE,
