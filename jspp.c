@@ -284,7 +284,6 @@ static void set_token_start(jspp_t * parser, uint8_t state, const char * txt)
 
 static void set_token_end(jspp_t * parser, uint8_t token, const char * txt)
 {
-    parser->token = token;
     // adjust the end of token pointer
     switch (token) {
         case JSON_NULL:
@@ -344,7 +343,7 @@ uint8_t jspp_next(jspp_t * parser)
 
     const char * const end = parser->text + parser->text_length;
     const char * txt = parser->text + parser->token_start + parser->token_length;
-    if (parser->token == JSON_STRING) {
+    if (parser->token == JSON_STRING || parser->token == JSON_MEMBER_NAME) {
         // move past the closing '"'
         ++txt;
     }
@@ -364,8 +363,9 @@ uint8_t jspp_next(jspp_t * parser)
         }
     } while (!is_final(state) && ++txt < end);
 
+    uint8_t token;
     if (is_final(state)) {
-        uint8_t token = state;
+        token = state;
         if (token == JSON_ARRAY_END || token == JSON_OBJECT_END) {
             // These 2 have not had their start offsets set yet. Do that now.
             set_token_start(parser, token, txt);
@@ -381,25 +381,24 @@ uint8_t jspp_next(jspp_t * parser)
         }
         state = next_parsing_state(state);
         set_state(parser, state);
-        return token;
-    }
-    // if the (scanner) state is not final, then we are in the middle of a token scanning
-    // and need to set the next start state to the current scanner state, so the machine
-    // would continue where it left off
-    set_state(parser, state);
-    set_token_end(parser, state, end);
-
-    if (STRING_BEGIN <= state && state <= __STRING_END) {
-        uint8_t prev_level_state = parser->stack[parser->level - 1];
-        if (is_string_a_member_name(prev_level_state)) {
-            return JSON_MEMBER_NAME_PART;
-        }
-        return JSON_STRING_PART;
-    } else if (NUMBER_BEGIN <= state && state <= __NUMBER_END) {
-        return JSON_NUMBER_PART;
     } else {
-        return JSON_CONTINUE;
+        // if the (scanner) state is not final, then we are in the middle of a token scanning
+        // and need to set the next start state to the current scanner state, so the machine
+        // would continue where it left off
+        set_state(parser, state);
+        set_token_end(parser, state, end);
+
+        if (STRING_BEGIN <= state && state <= __STRING_END) {
+            uint8_t prev_level_state = parser->stack[parser->level - 1];
+            token = is_string_a_member_name(prev_level_state) ? JSON_MEMBER_NAME_PART : JSON_STRING_PART;
+        } else if (NUMBER_BEGIN <= state && state <= __NUMBER_END) {
+            token = JSON_NUMBER_PART;
+        } else {
+            token = JSON_CONTINUE;
+        }
     }
+    parser->token = token;
+    return token;
 }
 
 ///< This function skips objects and arrays.
@@ -415,9 +414,9 @@ static uint8_t skip_composite(jspp_t * parser)
     return jspp_next(parser);
 }
 
-uint8_t jspp_skip_next(jspp_t * parser)
+///< This function skips a JSON element that starts at the specified token
+static uint8_t skip(jspp_t * parser, uint8_t token)
 {
-    uint8_t token = jspp_next(parser);
     if (token <= JSON_END) {
         parser->skip_token = 0;
         return token;
@@ -450,6 +449,16 @@ uint8_t jspp_skip_next(jspp_t * parser)
     }
     parser->skip_token = 0;
     return jspp_next(parser);
+}
+
+uint8_t jspp_skip_next(jspp_t * parser)
+{
+    return skip(parser, jspp_next(parser));
+}
+
+uint8_t jspp_skip(jspp_t * parser)
+{
+    return skip(parser, parser->token);
 }
 
 const char * jspp_text(jspp_t * parser, uint16_t * token_length)

@@ -17,4 +17,4 @@ tests: tests.c test.o test.h libjspp.a
 	$(CC) $(CFLAGS) $(LDFLAGS) $(filter %.c %.o,$^) -ljspp -o $@
 
 clean:
-	$(RM) *.o *.a tests tests.exe
+	$(RM) *.o *.a tests *.exe

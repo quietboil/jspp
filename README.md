@@ -236,11 +236,28 @@ This function returns a pointer to the recognized token text and it saves the le
 ```h
 uint8_t jspp_skip(jspp_t * parser);
 ```
+This function skips the *current* JSON **element** and return the code of the token after the skipped element. Its behavior depends on what the current element (as indicated by the last token) is:
+
+- When the current element is a *fully* recognized number (`JSON_INTEGER`, `JSON_DECIMAL` or `JSON_FLOATING_POINT`), a string (`JSON_STRING`) or an object member name (`JSON_MEMBER_NAME`) there is really nothing to skip, so the function behaves as if `jspp_next` has been called.
+- When the current element is a partially recognized element - `JSON_NUMBER_PART`, `JSON_STRING_PART` or `JSON_MEMBER_NAME_PART` - this function will skip the rest of the element and return the token after the skipped one. Note that in this case - as a partial token can only be encountered at the end of the current data fragment - `jspp_skip` itself actually will return `JSON_CONTINUE`. However it also configures the parser to skip the rest of the current element when the next fragment is available. In other words when the `jspp_continue` is called it will know that it needs to skip the rest of the current element and return the token after the skipped one.
+- When the current element is an object or an array (as indicated by the most recently returned `JSON_OBJECT_BEGIN` or `JSON_ARRAY_BEGIN`) `jspp_skip` will skip the entire object or the entire array.
+
+The last behavior is where this function is the most useful. When parsing expects something in particular, but instead encounters a differently sttuctured JSON it has two options:
+- abandon payload processing entirely and return error or
+- skip the unexpected element and discover and return only the partual result.
+
+> **Note** that like `jspp_skip_next` (see below) this function skips elements rather than tokens. It also (as `jspp_skip_next` does) might return `JSON_CONTINUE` if it is skipping over a particularly large element or when the element being skipped is interrupted by the end of the current text fragment.
+
+### Skip Next
+
+```h
+uint8_t jspp_skip_next(jspp_t * parser);
+```
 This function behaves like `jspp_next` except it will first skip the next JSON **element** and return the code of the token after the skipped element.
 
 > **Note** that this function does not skip tokens. It skips elements, which could actually be tokens - strings, numbers, etc. or entire objects or arrays if that's what was next in the stream. Objects and arrays can have nested elements of their own (up to the limit allowed by the `JSON_MAX_STACK`) that will also be skipped being a part of the object/array that is being skipped.
 
-When `jspp_skip` is skipping particularly large element which crosses the edge of the current fragment, `jspp_skip` will actually return `JSON_CONTINUE` and will set a special condintion to let `jspp_continue` know that it should keep skipping tokens and return the token after the current element is completely skipped.
+When `jspp_skip_next` is skipping particularly large element which crosses the edge of the current fragment, `jspp_skip` will actually return `JSON_CONTINUE` and will set a special condintion to let `jspp_continue` know that it should keep skipping tokens and return the token after the current element is completely skipped.
 
 > **Note** that when the element crosses multiple data fragments, then `jspp_continue` will also return `JSON_CONTINUE`. This will continue until the current element is skipped. Then and only then the next token is returned.
 

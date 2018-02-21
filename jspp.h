@@ -123,4 +123,18 @@ const char * jspp_text(jspp_t * parser, uint16_t * length);
  */
 uint8_t jspp_skip_next(jspp_t * parser);
 
+/**
+ * \brief Skips the current JSON element and returns the token that follows the skipped element.
+ *
+ * \param parser A pointer to the parser struct
+ *
+ * \return The ID of the token after the skipped element
+ *
+ * This function skips the current element. It is mostly useful to skip the detected but unexpected
+ * objects or arrays. It can also skip the rest of the partially returned numbers and strings. In cases,
+ * when the current element has been completely scanned, there will be nothing to skip, so the function
+ * just returns the next token.
+ */
+uint8_t jspp_skip(jspp_t * parser);
+
 #endif
