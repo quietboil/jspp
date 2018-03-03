@@ -26,7 +26,7 @@ The main features of this library are designed to make it effective in, maybe se
 - **Pull parsing** - The *jspp* API is designed for the *pull parsing* programming model - a library user calls parser functions when needed.
 - **Filter unnecessary elements** - *jspp* allows the caller to skip elements in JSON reponse that the application is not interested in.
 
-> **Note:** streaming parsing of the payload that is delivered in fragments often (maybe even always) means that one has to implement a state machine. The latter gives the abillity to track where one is in the parsing process and continue from the point where one was interrupted when the next fragment arrives. State machines often are generated. Manually coding them might not be your piece of cake. That's one of the drawbacks of this library. Check `sunrise-sunset` example (in `examples`) to get an idea of how a manually implemented machine might look like.
+> **Note:** streaming parsing of the payload that is delivered in fragments often (maybe even always) means that one has to implement a state machine. The latter gives the abillity to track where one is in the parsing process and continue from the point where one was interrupted when the next fragment arrives. State machines often are generated. Manually coding them might not be your piece of cake. That's one of the drawbacks of this library. Check `sunrise-sunset` example (in `examples`) to get an idea of how a manually implemented machine might look like. Also review **jspp**'s complementary project - [**jssp**](/quietboil/jssp) - that generates state machines required for semi-automated data extraction.
 
 These *jspp* features might also be interesting/important:
 
@@ -43,7 +43,7 @@ These *jspp* features might also be interesting/important:
 
 Start by cloning or downloading and extracting the ZIP of this repository. For example:
 ```
-$ git clone https://github.com/quietboil/jasonspp
+$ git clone https://github.com/quietboil/jspp
 ```
 
 Then execute `make` to build the library.
