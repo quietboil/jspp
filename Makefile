@@ -3,7 +3,12 @@
 CFLAGS 	?= -O2
 LDFLAGS ?= -L $(CURDIR)
 
-all: libjspp.a
+ifdef SystemDrive
+	EXE := .exe
+endif
+TESTS := tests$(EXE)
+
+all: libjspp.a $(TESTS)
 
 libjspp.a: jspp.o
 	$(AR) rc $@ $^
@@ -11,10 +16,8 @@ libjspp.a: jspp.o
 jspp.o: jspp.c jspp.h
 	$(CC) -c $(CFLAGS) $(filter %.c,$^) -o $@
 
-test.o: test.c
-
-tests: tests.c test.o test.h libjspp.a
-	$(CC) $(CFLAGS) $(LDFLAGS) $(filter %.c %.o,$^) -ljspp -o $@
+$(TESTS): tests.o test.o libjspp.a
+	$(CC) $(LDFLAGS) $(filter %.o,$^) -ljspp -o $@
 
 clean:
-	$(RM) *.o *.a tests *.exe
+	$(RM) *.o *.a $(TESTS)

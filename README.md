@@ -50,7 +50,7 @@ Then execute `make` to build the library.
 
 > **Note:** you might need to create `config.mk` file to define `CC`, `AR`, `CFLAGS`, `LDFLAGS`, etc. make variables if you are crosscompiling. As-is `make` will build the libary for your host.
 
-Move `libjasonspp.a` to a suitable location for libraries and `jspp.h` for C headers that will be used to build your application.
+Move `libjspp.a` to a suitable location for libraries and `jspp.h` for C headers that will be used to build your application.
 
 You are all set. Optionally review `tests.c` for hints of usages.
 
@@ -61,7 +61,7 @@ You are all set. Optionally review `tests.c` for hints of usages.
 Let's say the web service response is small enough to fit into a single data transmission fragment that the device can accept:
 ```json
 {
-    "tagret": "World",
+    "target": "World",
     "action": "Hello"
 }
 ```
@@ -74,7 +74,7 @@ Let's assume that the device OS provides:
 Let's also assume that those 2 assumptions are defined in some `sys.h` file that our project will include:
 ```h
 // ...
-typedef void (*http_cb_t)(const uint8_t * http_data, uin16_t data_size);
+typedef void (*http_cb_t)(const uint8_t * http_data, uint16_t data_size);
 
 void http_get(const char * url, http_cb_t cb);
 void send_message_to_task(uint8_t task_id, uint16_t msg);
@@ -263,13 +263,7 @@ When `jspp_skip_next` is skipping particularly large element which crosses the e
 
 ## Tests
 
-To build *jspp* unit tests execute:
-```sh
-make tests
-```
-
-To run them execute:
+*jspp* unit tests are contained in a single executable that was built with the library. To run them execute:
 ```sh
 tests
 ```
-
