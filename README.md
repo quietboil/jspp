@@ -263,7 +263,14 @@ When `jspp_skip_next` is skipping particularly large element which crosses the e
 
 ## Tests
 
-*jspp* unit tests are contained in a single executable that was built with the library. To run them execute:
+To build *jspp* unit tests execute:
 ```sh
-tests
+$ make tests
+```
+
+> **Note** that you might need to remove/update `config.mk` if you created one to crosscompile the library as `make tests` would need to build the tests and the **jspp** library on the host platform.
+
+This will build single executable `tests`. To run it execute:
+```sh
+$ ./tests
 ```
